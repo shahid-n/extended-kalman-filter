@@ -1,4 +1,4 @@
-which is precisely# Extended Kalman Filter Project
+# Extended Kalman Filter Project
 **Self-Driving Car Engineer Nanodegree Program**
 
 ## EKF Project Goals 
