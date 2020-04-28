@@ -73,7 +73,7 @@ This code works because in a real world physical process such as a moving car or
 
 ## Concluding Remarks
 
-This project was a good introduction to real time sensor fusion and state estimation in the presence of measurement noise. The concepts and techniques introduced here are invaluable in practical applications of signal processing and control algorithms in embedded systems.
+This project was a good introduction to real time sensor fusion and state estimation in the presence of additive white, Gaussian distributed measurement noise (AWGN). The concepts and techniques introduced here are invaluable in practical applications of signal processing and control algorithms in embedded systems.
 
 ### Next Steps
 
