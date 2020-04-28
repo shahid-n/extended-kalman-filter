@@ -69,7 +69,7 @@ This numerical bug was fixed by adding the following code in [lines 63 to 68 of 
   }
 ```
 
-This code works because in a real world physical process such as a moving car or object, the changes in position as well as orientation are continuous in time (not to mention "smooth" under a suitable mathematical definition of the term) -- consequently, even upon discretisation via sampling, the expected successive changes in the sequence of position or heading errors are relatively small. Indeed, for a sufficiently small sampling interval, it is virtually impossible for an object such as a car to instantaneously flip its heading by a full _&pi;_ radians. Therefore, the process of iteratively adding or subtracting 2_&pi;_ as appropriate, until the heading error is always restricted within the interval (-_&pi;_, _&pi;_] and never outside it, successfully addresses this numerical issue.
+This code works because in a real world physical process such as a moving car or object, the changes in position as well as orientation are continuous in time (not to mention "smooth" under a suitable mathematical definition of the term) -- consequently, even upon discretisation via sampling, the expected successive changes in the sequence of position or heading errors are relatively small. Indeed, for a sufficiently small sampling interval, it is virtually impossible for an object such as a car to instantaneously flip its heading by a full _&pi;_ radians. Therefore, the process of iteratively adding or subtracting 2 _&pi;_ as appropriate, until the heading error is always restricted within the interval (-_&pi;_, _&pi;_] and never outside it, successfully addresses this numerical issue.
 
 ## Concluding Remarks
 
