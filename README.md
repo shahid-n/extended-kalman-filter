@@ -1,4 +1,4 @@
-# Extended Kalman Filter Project
+which is precisely# Extended Kalman Filter Project
 **Self-Driving Car Engineer Nanodegree Program**
 
 ## EKF Project Goals 
@@ -57,7 +57,7 @@ A more intractable problem occurred during simulation, especially with `Dataset 
 
 The root cause for this bug is apparent from the documentation of the `atan2()` function -- specifically, whenever the trajectory is either: a) parallel or tangent to the _x_-axis and intersects with the _y_, or b) parallel or tangent to the _y_-axis and simultaneously intersects with the _x_-axis, the lack of numerical resolution in one or both arguments to this function can lead to a sudden jump between 0 and +/-_&pi;_ radians in case a), or a discontinuous and instantaneous jump between +/-_&pi;_/2 radians in case b).
 
-This issue is further exacerbated by the difference calculation _y_(1) = _z_(1) - _&phi;_, which is the error in the heading angle, which could see instantaneous jumps on the order of _&pi;_ if this issue were not addressed, which is precisely what was happening as shown in the screen capture above.
+This issue is further exacerbated by the difference calculation _y_(1) = _z_(1) - _&phi;_, namely the error in the heading angle, which could see instantaneous jumps on the order of _&pi;_ if this issue were not addressed, and this is precisely what was happening as shown in the screen capture above.
 
 This numerical bug was fixed by adding the following code in [lines 63 to 68 of kalman_filter.cpp](https://github.com/shahid-n/extended-kalman-filter/blob/master/src/kalman_filter.cpp#L63):
 ```
