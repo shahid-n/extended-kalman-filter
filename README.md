@@ -20,9 +20,9 @@ Additionally, the source files, output and results of this project must also mee
 
 ## Repository Overview
 
-In order to succesfully compile the source code and run the executable to process the measurement data and talk to the simulator, the following files needed to be filled in with the correct code.
+In order to succesfully compile the source code and run the executable to process the measurement data and communicate with the simulator, the following files needed to be filled in with the correct code.
 1. [FusionEKF.cpp](./src/FusionEKF.cpp) which initialises the EKF state variables and calls both the prediction and update methods of the `ekf_` object
-2. [kalman_filter.cpp](./src/kalman_filter.cpp) which defines the `KalmanFilter` class, of which the `ekf` object mentioned above is an instance, and all associated prediction and update methods, whose equations had to be filled in
+2. [kalman_filter.cpp](./src/kalman_filter.cpp) which defines the `KalmanFilter` class, of which the `ekf_` object mentioned above is an instance, and all associated prediction and update methods, whose equations had to be filled in
 3. [tools.cpp](./src/tools.cpp) which contains supporting methods to calculate the Jacobian matrix for the radar update equations, and also to compute the RMSE during simulation
 
 This project was compiled and built using the default [CMakeLists.txt](https://github.com/udacity/CarND-Extended-Kalman-Filter-Project/blob/master/CMakeLists.txt) file provided in the project starter repository.
@@ -45,7 +45,7 @@ That being said, a tricky numerical bug was the root cause for large tracking er
 
 Whilst it was relatively straightforward to initially eliminate all syntax errors through proper declaration of all the variables and careful review of calls to member functions and their associated prototype definitions -- not to mention learning to work with the specialised `VectorXd` and `MatrixXd` data types -- it was a little bit more challenging to ascertain the root cause for a rather cryptic run-time error which cropped up even after the project was compiled successfully. An excerpt of the error message is shown below.
 ```
-`Assertion 'index > = 0 & & index < size()' failed. Aborted (core dumped)`
+Assertion 'index > = 0 & & index < size()' failed. Aborted (core dumped)
 ```
 
 It turned out this error was occurring due to some variables that had not been properly initialised within the `ekf_` object -- once all vector and matrix elements were properly assigned initial values, this problem was resolved.
@@ -55,9 +55,9 @@ It turned out this error was occurring due to some variables that had not been p
 A more intractable problem occurred during simulation, especially with `Dataset 1` -- the RMSE values were growing large too quickly, and there was a clearly distinguishable discontinuous jump during the overlapping leg of the figure eight manoeuvre, complete with a 180-degree flip in orientation from one instant to the next, as depicted in the screenshot below.
 ![alt text][bug]
 
-The root cause for this bug is apparent from the documentation of the `atan2()` function -- specifically, whenever the trajectory is either: a) parallel or tangent to the x-axis and intersects with the y, or b) parallel or tangent to the y-axis and simultaneously intersects with the x-axis, the lack of numerical resolution in one or both arguments to this function can lead to a sudden jump between 0 and +/-_&pi;_ radians in case a), or a discontinuous and instantaneous jump between +/-_&pi;_/2 radians in case b).
+The root cause for this bug is apparent from the documentation of the `atan2()` function -- specifically, whenever the trajectory is either: a) parallel or tangent to the _x_-axis and intersects with the _y_, or b) parallel or tangent to the _y_-axis and simultaneously intersects with the _x_-axis, the lack of numerical resolution in one or both arguments to this function can lead to a sudden jump between 0 and +/-_&pi;_ radians in case a), or a discontinuous and instantaneous jump between +/-_&pi;_/2 radians in case b).
 
-This issue is further exacerbated by the difference calculation `_y_(1) - _z_(1)`, which is the error in the heading angle, which could see instantaneous jumps of magnitude _&pi;_ if this issue were not addressed, which is precisely what was happening as shown in the screen capture above.
+This issue is further exacerbated by the difference calculation _y_(1) - _z_(1), which is the error in the heading angle, which could see instantaneous jumps of magnitude _&pi;_ if this issue were not addressed, which is precisely what was happening as shown in the screen capture above.
 
 This numerical bug was fixed by adding the following code in [lines 63 to 68 of kalman_filter.cpp](https://github.com/shahid-n/extended-kalman-filter/blob/master/src/kalman_filter.cpp#L63):
 ```
@@ -69,7 +69,7 @@ This numerical bug was fixed by adding the following code in [lines 63 to 68 of 
   }
 ```
 
-This code works because in a real world physical process such as a moving car or object, the changes in position as well as orientation are continuous in time (not to mention "smooth" under a suitable mathematical definition of the term) -- consequently, even upon discretisation via sampling, the expected successive changes in the sequence of position or heading errors are relatively small. Indeed, for a sufficiently small sampling interval, it is virtually impossible for an object such as a car to instantaneously flip its heading by a full _&pi;_ radians. Therefore, the process of iteratively adding or subtracting 2_&pi_ as appropriate, until the heading error is always restricted within the interval [-_&pi;_, _&pi;_] and never outside it, successfully addresses this numerical issue.
+This code works because in a real world physical process such as a moving car or object, the changes in position as well as orientation are continuous in time (not to mention "smooth" under a suitable mathematical definition of the term) -- consequently, even upon discretisation via sampling, the expected successive changes in the sequence of position or heading errors are relatively small. Indeed, for a sufficiently small sampling interval, it is virtually impossible for an object such as a car to instantaneously flip its heading by a full _&pi;_ radians. Therefore, the process of iteratively adding or subtracting 2_&pi;_ as appropriate, until the heading error is always restricted within the interval (-_&pi;_, _&pi;_] and never outside it, successfully addresses this numerical issue.
 
 ## Concluding Remarks
 
