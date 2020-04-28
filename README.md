@@ -52,7 +52,7 @@ It turned out this error was occurring due to some variables that had not been p
 
 ### 2. Numerical bug during simulation
 
-A more intractable problem occurred during simulation, especially with `Dataset 1` -- the RMSE values were growing large too quickly, and there was a clearly distinguishable discontinuous jump during the overlapping leg of the figure eight manoeuvre, complete with a 180-degree flip in the heading estimate from one instant to the next, as depicted in the screenshot below.
+A more intractable problem occurred during simulation, especially with `Dataset 1` -- the RMSE values were growing large too quickly, and there was a clearly distinguishable discontinuous jump during the overlapping leg of the figure eight manoeuvre right around the time the object ventured near _y_ = 0, complete with a 180-degree flip in the heading estimate from one instant to the next, as depicted in the screenshot below.
 ![alt text][bug]
 
 The root cause for this bug is apparent from the [documentation](https://en.cppreference.com/w/cpp/numeric/math/atan2) of the `atan2()` function -- specifically, whenever the trajectory is either: a) parallel or tangent to the _x_-axis and intersects with the _y_, or b) parallel or tangent to the _y_-axis and simultaneously intersects with the _x_-axis, the lack of numerical resolution in one or both arguments to this function can lead to a sudden jump between 0 and +/-_&pi;_ radians in case a), or a discontinuous and instantaneous jump between +/-_&pi;_/2 radians in case b).
