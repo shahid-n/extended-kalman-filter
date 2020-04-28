@@ -1,134 +1,80 @@
-# Extended Kalman Filter Project Starter Code
-Self-Driving Car Engineer Nanodegree Program
+# Extended Kalman Filter Project
+**Self-Driving Car Engineer Nanodegree Program**
 
-In this project you will utilize a kalman filter to estimate the state of a moving object of interest with noisy lidar and radar measurements. Passing the project requires obtaining RMSE values that are lower than the tolerance outlined in the project rubric. 
+## EKF Project Goals 
 
-This project involves the Term 2 Simulator which can be downloaded [here](https://github.com/udacity/self-driving-car-sim/releases).
+This project entails the creation of an extended Kalman filter to fuse radar and lidar measurements, and to output filtered next-state estimates whilst also iteratively updating the state variables based on the current measurements, which are corrupted by noise. The goals of this project are twofold.
 
-This repository includes two files that can be used to set up and install [uWebSocketIO](https://github.com/uWebSockets/uWebSockets) for either Linux or Mac systems. For windows you can use either Docker, VMware, or even [Windows 10 Bash on Ubuntu](https://www.howtogeek.com/249966/how-to-install-and-use-the-linux-bash-shell-on-windows-10/) to install uWebSocketIO. Please see the uWebSocketIO Starter Guide page in the classroom within the EKF Project lesson for the required version and installation scripts.
+1. Track the motion of a single object in the xy-plane in real time, based on noisy radar and lidar measurements
+2. Keep the overall root-mean-squared error (RMSE) -- for the example run using Dataset 1 -- below the prescribed thresholds of `0.11 m` for both position estimates, and `0.52 m/s` for the estimated velocities, respectively
 
-Once the install for uWebSocketIO is complete, the main program can be built and run by doing the following from the project top directory.
+Additionally, the source files, output and results of this project must also meet the criteria laid out in the linked [project rubric](https://review.udacity.com/#!/rubrics/748/view).
 
-1. mkdir build
-2. cd build
-3. cmake ..
-4. make
-5. ./ExtendedKF
+[//]: # (Image References)
 
-Tips for setting up your environment can be found in the classroom lesson for this project.
-
-Note that the programs that need to be written to accomplish the project are src/FusionEKF.cpp, src/FusionEKF.h, kalman_filter.cpp, kalman_filter.h, tools.cpp, and tools.h
-
-The program main.cpp has already been filled out, but feel free to modify it.
-
-Here is the main protocol that main.cpp uses for uWebSocketIO in communicating with the simulator.
-
-
-**INPUT**: values provided by the simulator to the c++ program
-
-["sensor_measurement"] => the measurement that the simulator observed (either lidar or radar)
-
-
-**OUTPUT**: values provided by the c++ program to the simulator
-
-["estimate_x"] <= kalman filter estimated position x
-
-["estimate_y"] <= kalman filter estimated position y
-
-["rmse_x"]
-
-["rmse_y"]
-
-["rmse_vx"]
-
-["rmse_vy"]
+[data1]: ./output/sim_output_datatset_1.png "Output from Dataset1"
+[data2]: ./output/sim_output_datatset_2.png "Output from Dataset2"
+[bug]: ./output/bug_heading.png "Bug due to unrestricted heading angle tracking error"
 
 ---
 
-## Other Important Dependencies
+## Repository Overview
 
-* cmake >= 3.5
-  * All OSes: [click here for installation instructions](https://cmake.org/install/)
-* make >= 4.1 (Linux, Mac), 3.81 (Windows)
-  * Linux: make is installed by default on most Linux distros
-  * Mac: [install Xcode command line tools to get make](https://developer.apple.com/xcode/features/)
-  * Windows: [Click here for installation instructions](http://gnuwin32.sourceforge.net/packages/make.htm)
-* gcc/g++ >= 5.4
-  * Linux: gcc / g++ is installed by default on most Linux distros
-  * Mac: same deal as make - [install Xcode command line tools](https://developer.apple.com/xcode/features/)
-  * Windows: recommend using [MinGW](http://www.mingw.org/)
+In order to succesfully compile the source code and run the executable to process the measurement data and talk to the simulator, the following files needed to be filled in with the correct code.
+1. [FusionEKF.cpp](./src/FusionEKF.cpp) which initialises the EKF state variables and calls both the prediction and update methods of the `ekf_` object
+2. [kalman_filter.cpp](./src/kalman_filter.cpp) which defines the `KalmanFilter` class, of which the `ekf` object mentioned above is an instance, and all associated prediction and update methods, whose equations had to be filled in
+3. [tools.cpp](./src/tools.cpp) which contains supporting methods to calculate the Jacobian matrix for the radar update equations, and also to compute the RMSE during simulation
 
-## Basic Build Instructions
+This project was compiled and built using the default [CMakeLists.txt](https://github.com/udacity/CarND-Extended-Kalman-Filter-Project/blob/master/CMakeLists.txt) file provided in the project starter repository.
 
-1. Clone this repo.
-2. Make a build directory: `mkdir build && cd build`
-3. Compile: `cmake .. && make` 
-   * On windows, you may need to run: `cmake .. -G "Unix Makefiles" && make`
-4. Run it: `./ExtendedKF `
+## Results
 
-## Editor Settings
+Following a few iterations of debugging and recompiling, the executable was eventually able to successfully communicate with the simulator and generate its state predictions and updates, along with the RMSE values.
 
-We've purposefully kept editor configuration files out of this repo in order to
-keep it as simple and environment agnostic as possible. However, we recommend
-using the following settings:
+The results corresponding to `Dataset 1` are shown below, and it is clear from the screenshot that the RMSE metrics from the rubric have been met.
+![alt text][data1]
 
-* indent using spaces
-* set tab width to 2 spaces (keeps the matrices in source code aligned)
+Similarly, the following screenshot depicting simulation results corresponding to `Dataset 2` is also in compliance with the RMSE criteria stipulated in the rubric.
+![alt text][data2]
 
-## Code Style
+That being said, a tricky numerical bug was the root cause for large tracking errors when the object was looping back close to the origin whilst replaying `Dataset 1`; this bug fix is discussed in more detail in the next section.
 
-Please (do your best to) stick to [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html).
+## Project Challenges
 
-## Generating Additional Data
+### 1. Compile time and run time errors
 
-This is optional!
+Whilst it was relatively straightforward to initially eliminate all syntax errors through proper declaration of all the variables and careful review of calls to member functions and their associated prototype definitions -- not to mention learning to work with the specialised `VectorXd` and `MatrixXd` data types -- it was a little bit more challenging to ascertain the root cause for a rather cryptic run-time error which cropped up even after the project was compiled successfully. An excerpt of the error message is shown below.
+```
+`Assertion 'index > = 0 & & index < size()' failed. Aborted (core dumped)`
+```
 
-If you'd like to generate your own radar and lidar data, see the
-[utilities repo](https://github.com/udacity/CarND-Mercedes-SF-Utilities) for
-Matlab scripts that can generate additional data.
+It turned out this error was occurring due to some variables that had not been properly initialised within the `ekf_` object -- once all vector and matrix elements were properly assigned initial values, this problem was resolved.
 
-## Project Instructions and Rubric
+### 2. Numerical bug during simulation
 
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
+A more intractable problem occurred during simulation, especially with `Dataset 1` -- the RMSE values were growing large too quickly, and there was a clearly distinguishable discontinuous jump during the overlapping leg of the figure eight manoeuvre, complete with a 180-degree flip in orientation from one instant to the next, as depicted in the screenshot below.
+![alt text][bug]
 
-More information is only accessible by people who are already enrolled in Term 2 (three-term version) or Term 1 (two-term version)
-of CarND. If you are enrolled, see the Project Resources page in the classroom
-for instructions and the project rubric.
+The root cause for this bug is apparent from the documentation of the `atan2()` function -- specifically, whenever the trajectory is either: a) parallel or tangent to the x-axis and intersects with the y, or b) parallel or tangent to the y-axis and simultaneously intersects with the x-axis, the lack of numerical resolution in one or both arguments to this function can lead to a sudden jump between 0 and +/-_&pi;_ radians in case a), or a discontinuous and instantaneous jump between +/-_&pi;_/2 radians in case b).
 
-## Hints and Tips!
+This issue is further exacerbated by the difference calculation `_y_(1) - _z_(1)`, which is the error in the heading angle, which could see instantaneous jumps of magnitude _&pi;_ if this issue were not addressed, which is precisely what was happening as shown in the screen capture above.
 
-* You don't have to follow this directory structure, but if you do, your work
-  will span all of the .cpp files here. Keep an eye out for TODOs.
-* Students have reported rapid expansion of log files when using the term 2 simulator.  This appears to be associated with not being connected to uWebSockets.  If this does occur,  please make sure you are conneted to uWebSockets. The following workaround may also be effective at preventing large log files.
+This numerical bug was fixed by adding the following code in [lines 63 to 68 of kalman_filter.cpp](https://github.com/shahid-n/extended-kalman-filter/blob/master/src/kalman_filter.cpp#L63):
+```
+  while (y(1) < -M_PI) {
+    y(1) += 2*M_PI;
+  }
+  while (y(1) > M_PI) {
+    y(1) -= 2*M_PI;
+  }
+```
 
-    + create an empty log file
-    + remove write permissions so that the simulator can't write to log
- * Please note that the ```Eigen``` library does not initialize ```VectorXd``` or ```MatrixXd``` objects with zeros upon creation.
+This code works because in a real world physical process such as a moving car or object, the changes in position as well as orientation are continuous in time (not to mention "smooth" under a suitable mathematical definition of the term) -- consequently, even upon discretisation via sampling, the expected successive changes in the sequence of position or heading errors are relatively small. Indeed, for a sufficiently small sampling interval, it is virtually impossible for an object such as a car to instantaneously flip its heading by a full _&pi;_ radians. Therefore, the process of iteratively adding or subtracting 2_&pi_ as appropriate, until the heading error is always restricted within the interval [-_&pi;_, _&pi;_] and never outside it, successfully addresses this numerical issue.
 
-## Call for IDE Profiles Pull Requests
+## Concluding Remarks
 
-Help your fellow students!
+This project was a good introduction to real time sensor fusion and state estimation in the presence of measurement noise. The concepts and techniques introduced here are invaluable in practical applications of signal processing and control algorithms in embedded systems.
 
-We decided to create Makefiles with cmake to keep this project as platform
-agnostic as possible. Similarly, we omitted IDE profiles in order to ensure
-that students don't feel pressured to use one IDE or another.
+### Next Steps
 
-However! We'd love to help people get up and running with their IDEs of choice.
-If you've created a profile for an IDE that you think other students would
-appreciate, we'd love to have you add the requisite profile files and
-instructions to ide_profiles/. For example if you wanted to add a VS Code
-profile, you'd add:
-
-* /ide_profiles/vscode/.vscode
-* /ide_profiles/vscode/README.md
-
-The README should explain what the profile does, how to take advantage of it,
-and how to install it.
-
-Regardless of the IDE used, every submitted project must
-still be compilable with cmake and make.
-
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
-
+A natural extension of this project would be to seek out more state of the art techniques based on the theory of nonlinear observers and robust nonlinear control of multi-input, multi-output (MIMO) systems.
