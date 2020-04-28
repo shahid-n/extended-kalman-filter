@@ -5,7 +5,7 @@
 
 This project entails the creation of an extended Kalman filter to fuse radar and lidar measurements, and to output filtered next-state estimates whilst also iteratively updating the state variables based on the current measurements, which are corrupted by noise. The goals of this project are twofold.
 
-1. Track the motion of a single object in the xy-plane in real time, based on noisy radar and lidar measurements
+1. Track the motion of a single object in the _xy_-plane in real time, based on noisy radar and lidar measurements
 2. Keep the overall root-mean-squared error (RMSE) -- for the example run using Dataset 1 -- below the prescribed thresholds of `0.11 m` for both position estimates, and `0.52 m/s` for the estimated velocities, respectively
 
 Additionally, the source files, output and results of this project must also meet the criteria laid out in the linked [project rubric](https://review.udacity.com/#!/rubrics/748/view).
